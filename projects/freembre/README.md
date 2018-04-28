@@ -1,5 +1,5 @@
 Brent Freeman freembre
-This is my assignment-2 submission
+This is my assignment-3 submission
 
-In dominion.c, 5 card actions were refactored to functions and 4 bugs were introduced.
+4 unit tests, and 4 card tests were added. Additionally, the Makefile was modified to run all unit and card tests.
 
