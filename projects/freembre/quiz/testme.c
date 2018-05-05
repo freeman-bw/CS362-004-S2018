@@ -1,7 +1,7 @@
 /*
 Brent Freeman
  Random Quiz
- CS362 
+ CS362
  */
 
 #include<stdio.h>
@@ -12,7 +12,6 @@ Brent Freeman
 
 char inputChar()
 {
-   
     char* testA = "[({ ax})]";
     int x = (rand() % 10);
     char c = testA[x];
@@ -21,8 +20,6 @@ char inputChar()
 
 char *inputString()
 {
-    // TODO: rewrite this function
-    //char* strTest = "rste";
     char arr[5]= {'r', 's', 't', 'e', '\0'};
     char out[5];
     int i, x;
@@ -71,7 +68,6 @@ void testme()
 
 int main(int argc, char *argv[])
 {
-    printf("here");
     srand(time(NULL));
     testme();
     return 0;
