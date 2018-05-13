@@ -1,5 +1,5 @@
 Brent Freeman freembre
-This is my assignment-3 submission
+This is my assignment-4 submission
 
-4 unit tests, and 4 card tests were added. Additionally, the Makefile was modified to run all unit and card tests.
+3 random card tests were added:randomtestcard1.c, randomtestcard2.c, and randomtestadventurer.c . Additionally, the Makefile was modified to run all of the Random tests and output to a file.
 
