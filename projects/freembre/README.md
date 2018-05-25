@@ -1,5 +1,5 @@
 Brent Freeman freembre
-This is my assignment-4 submission
+This is my assignment-5 submission
 
-3 random card tests were added:randomtestcard1.c, randomtestcard2.c, and randomtestadventurer.c . Additionally, the Makefile was modified to run all of the Random tests and output to a file.
+Added flder for mistryA. This folder contains all the source code from my partner and alll of my testing code and Makefile. In order to keep the code seperate, I added MA_ in front of her code that may conflict with mine.
 
