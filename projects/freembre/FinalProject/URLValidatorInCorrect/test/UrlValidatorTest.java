@@ -1,6 +1,3 @@
-
-
-
 import java.util.Scanner;
 import junit.framework.TestCase;
 import java.util.concurrent.ThreadLocalRandom;
@@ -10,9 +7,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * Authors: Ankita Mistry, Brent Freeman
  * 
  * These test functionsare used to test the Apache Commons UrlValidator functions.
- * Tests include manual, partition
- * 
- * 
+ * Tests include manual (two different tests available), partition(scheme regex), partition(scheme path), and random path
  *
  * */
  
@@ -36,11 +31,58 @@ public class UrlValidatorTest extends TestCase {
    public void testManualTest()
    {
 
+	 //You can use this function to implement your manual testing
+	   UrlValidator urlVal = new UrlValidator(null, null, UrlValidator.ALLOW_ALL_SCHEMES);
+	   
+	   System.out.print("testManualTest entry\n");
+
+	   //
+	   // Test URL with <Scheme><Authority><Path><Query><Fragment> components
+       //
+	   if (urlVal.isValid("http://www.google.com/forum/questions/?tag=networking&order=newest#top") == false) {
+		   System.out.print("    Test failed with <Scheme><Authority><Path><Query><Fragment> components\n");
+	   } else {
+		   System.out.print("    Test passed with <Scheme><Authority><Path><Query><Fragment> components\n");
+	   }
+
+	   //
+	   // Test URL with <Scheme><Authority><Path><Query> components
+       //
+	   if (urlVal.isValid("http://www.google.com/forum/questions/?tag=networking&order=newest") == false) {
+		   System.out.print("    Test failed with <Scheme><Authority><Path><Query> components\n");
+	   } else {
+		   System.out.print("    Test passed with <Scheme><Authority><Path><Query> components\n");
+	   }
+
+	   //
+	   // Test URL with <Scheme><Authority><Path> components
+       //
+	   if (urlVal.isValid("http://www.google.com/forum/questions/") == false) {
+		   System.out.print("    Test failed with <Scheme><Authority><Path> components\n");
+	   } else {
+		   System.out.print("    Test passed with <Scheme><Authority><Path> components\n");
+	   }
+
+	   //
+	   // Test URL with <Scheme><Authority> components
+       //
+	   if (urlVal.isValid("http://www.google.com") == false) {
+		   System.out.print("    Test failed with <Scheme><Authority> components\n");
+	   } else {
+		   System.out.print("    Test passed with <Scheme><Authority> components\n");
+	   }
+	   
+	   System.out.print("testManualTest exit\n\n");
+	   
+	   
+	   //Alternative manual test function (duplicate efforts by team members):
+	   
+	   /*
 	   System.out.println("Manual testing of known good and known bad urls");
 
 	  // This is an option to perform manual testing based on user input
 	   
-	   /* 
+	  // /
 	   System.out.println("Enter a test URL: ");
 	   Scanner scanner = new Scanner(System.in);
 	   String userURL = scanner.nextLine();	   
@@ -58,7 +100,7 @@ public class UrlValidatorTest extends TestCase {
 	           } else {
 	              System.out.println(userURL + ": url is invalid");
 	       }
-	       */
+	      // 
 	   
 	   
 
@@ -87,33 +129,168 @@ public class UrlValidatorTest extends TestCase {
 	   }
 
 	   System.out.println("End Manual testing");
-
+*/
    }
 	   
 
-public void testYourFirstPartition() //Ankita's test
-   { 
-	   //You can use this function to implement your First Partition testing
+   public void testYourFirstPartition()
+   {
+
 	   UrlValidator urlVal = new UrlValidator(null, null, UrlValidator.ALLOW_ALL_SCHEMES);
-	   String[] pathregex = {"@","&","?","=","+",",",".","!","/","~","*","'","%","$","_",";"};
-	   String TestString;
-	   
-	   System.out.print("testYourFirstPartition entry\n");
+	      
+	   // Scheme regex is defined as such: 
+	   //    ^\\p{Alpha}[\\p{Alnum}\\+\\-\\.]*
+	   //   |-|---------|--------------------|
+	   //    1     2             3
+	   //   1: must be new line beginning
+	   //   2: first character must be a alphabet
+	   //   3: rest of the characters can be alpha numeric
+       //
+	   ResultPair[] testSchemeRegex = {new ResultPair("http://", true),    // Instance is inverting the flag
+			   															   // root caused by comparing the passing vs. failing results
+			   															   // using debugger to check the initial state of the flag.               						  
+			   						   // new ResultPair("HTTP://", true),  // program crashed with this input
+            						   new ResultPair("h@tp://", false),
+            						   new ResultPair("1ttp://", false),
+            						   //new ResultPair("ht3p://", true),  // program crashed with this input
+            						   new ResultPair("1234://", false),
+            						   //new ResultPair("h://", true),     // program crashed with this input
+            						   //new ResultPair("h1://", true)     // program crashed with this input
+            						   };
 	   
 	   //
-	   // Test if path section of the URL excepts all the regular expressions
-       //
-	   for(int i = 0; i < pathregex.length; i++) {
-		   TestString = "http://www.google.com/forum" + pathregex[i] + "questions" + pathregex[i];
-		   //System.out.print(TestString + "\n");
-		   if (urlVal.isValid(TestString) == false) {
-			   System.out.printf("    Test failed: the URL path does not except %s character\n", pathregex[i]);
-		   }
+	   // Authority regex is defined as such: 
+	   //   (?:\\[([0-9a-fA-F:]+)\\]|(?:(?:[a-zA-Z0-9%-._~!$&'()*+,;=]+(?::[a-zA-Z0-9%-._~!$&'()*+,;=]*)?@)?([\\p{Alnum}\\-\\.]*)))(?::(\\d*))?(.*)?
+	   //   |----------------------------------------------------------------------------------------------|------------------|----------------|--|
+	   //    							1          																	2                3           4
+	   //   1,2,3: ignore groupings
+	   //   4: any characters
+	   //
+	   ResultPair[] testAuthRegex = {new ResultPair("www.google.com", true),
+				   					new ResultPair("1234.google.com", true),
+				   					new ResultPair("www.google.1234", false),
+				   					new ResultPair("www.1234.com", true),
+				   					new ResultPair("www.1234.com12", false),
+				   					new ResultPair("1235.4567.890", false),
+				   					new ResultPair("www.goo+gle.com", false),
+				   					new ResultPair("255.255.255.255", true),
+	                                new ResultPair("256.256.256.256", false)
+	                                };
+	   //
+	   // Port requirements:
+	   // 1: must be a number
+	   // 2: must be between zero & 65535
+	   //
+	   ResultPair[] testPortRegex = {new ResultPair(":1234", true),
+									new ResultPair(":ab", false),
+									new ResultPair(":", true),
+									new ResultPair(":@", false),
+									new ResultPair(":65536", false),
+									new ResultPair(":-1", false)
+									};   
+	   
+	   //
+	   // Query regex is defined as such:
+	   //   ^(\\S*)
+	   //  |-|----|
+	   //   1   2
+	   // 1: must be new line beginning
+	   // 2: Test for any non-whitespace character
+	   //
+	   ResultPair[] testQueryRegex = {new ResultPair("?abcd", true),
+									new ResultPair("?a bcd", false),
+									new ResultPair("? abcd", false),
+									new ResultPair("?@bcd", true),
+									new ResultPair("?1234", true),
+									new ResultPair("?a2bcd", true)
+									}; 
+	   
+	   //
+	   // Path regex is defined as such:
+	   //  [-\\w:@&?=+,.!/~*'%$_;\\(\\)]*)?$
+	   //  |-----|-----------------------|
+	   //     1           2
+	   // 1: A word character a-z, A-Z, 0-9
+	   // 2. A special character @&?=+,.!/~*'%$_;\\(\\)
+	   //
+	   String[] testPathRegex = {"@","&","?","=","+",",",".","!","/","~","*","'","%","$","_",";"};
+	   String TestString;
+	   ResultPair testPair;
+	   
+	   System.out.print("testYourFirstPartition entry\n");
+
+	   //
+	   // Test the <scheme> component regex violation
+	   //
+	   for(int i = 0; i< testSchemeRegex.length; i++) {
+		   	testPair = testSchemeRegex[i];
+		   	TestString = testPair.item + "www.google.com";
+	   		if (urlVal.isValid(TestString) != testPair.valid ) {
+	   			System.out.print("    <Scheme> partition test failed with " + TestString + "\n");
+	   		} else {
+	   			System.out.print("    <Scheme> partition test passed with " + TestString + "\n");
+	   		}
 	   }
+	   System.out.print("\n");
 	   
+	   //
+	   // Test the <authority> component regex violation
+	   //
+	   for(int i = 0; i< testAuthRegex.length; i++) {
+		   	testPair = testAuthRegex[i];
+		   	TestString = "http://" + testPair.item;
+	   		if (urlVal.isValid(TestString) != testPair.valid ) {
+	   			System.out.print("    <Authority> partition test failed with " + TestString + "\n");
+	   		} else {
+	   			System.out.print("    <Authority> partition test passed with " + TestString + "\n");
+	   		}
+	   }
+	   System.out.print("\n");
+	   
+	   //
+	   // Test the <port> component regex violation
+	   //
+	   for(int i = 0; i< testPortRegex.length; i++) {
+		   	testPair = testPortRegex[i];
+		   	TestString = "http://www.google.com" + testPair.item;
+	   		if (urlVal.isValid(TestString) != testPair.valid ) {
+	   			System.out.print("    <Port> partition test failed with " + TestString + "\n");
+	   		} else {
+	   			System.out.print("    <Port> partition test passed with " + TestString + "\n");
+	   		}
+	   }
+	   System.out.print("\n");
+
+	   //
+	   // Test the <path> component regex violation
+	   //
+	   for(int i = 0; i< testPathRegex.length; i++) {
+		    TestString = "http://www.google.com.com/forum"  + testPathRegex[i] + "questions";
+	   		if (urlVal.isValid(TestString) == false) {
+	   			System.out.print("    <Path> partition failed with " + TestString +"\n");
+	   		} else {
+	   			System.out.print("    <Path> partition passed with " + TestString + "\n");
+	   		}
+	   }
+	   System.out.print("\n");
+
+	   //
+	   // Test the <query> component regex violation
+	   //
+	   for(int i = 0; i< testQueryRegex.length; i++) {
+		   testPair = testQueryRegex[i];
+		   TestString = "http://www.google.com.com/forum,questions"+ testPair.item;
+		   if (urlVal.isValid(TestString) != testPair.valid ) {
+			   System.out.print("    <Query> partition failed with " + TestString +"\n");
+		   } else {
+			   System.out.print("    <Query> partition passed with " + TestString + "\n");
+		   }
+	   }	   
+
 	   System.out.print("testYourFirstPartition exit\n\n");
-	   
    }
+  
+
    
 String[] badPath = { "ttps", "htts", "ftp", "htp", "htt", "ttp", "HTT", "FT", "local", "localhost"};
 String[] goodPath = { "http", "HTTP", "https", "HTTPS", "ftp", "FTP"};
